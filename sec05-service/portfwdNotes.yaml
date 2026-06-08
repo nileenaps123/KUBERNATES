@@ -1,0 +1,33 @@
+kubectl port-forward deploy/assignment
+
+
+
+The prefix deploy/ is a shortcut telling Kubernetes exactly what type of resource you are looking for. It is short for Deployment.
+
+When you run a command like kubectl port-forward, Kubernetes needs to know two pieces of information to find your app:
+
+The Resource Type: (Is it a Pod, a Service, or a Deployment?)
+
+The Resource Name: (In your case, assignment)
+
+By writing deploy/assignment, you are explicitly stating: "Hey Kubernetes, look inside my Deployments to find the one named 'assignment' and forward my traffic there."
+
+What happens if you leave out deploy/?
+If you just ran:
+
+kubectl port-forward assignment 8080:8080
+
+By default, kubectl will assume you are looking for a Pod. If you don't have a standalone pod named exactly assignment (remember, your deployment pods have random strings at the end, like assignment-7fd89bc4-x9z2p), the command will instantly fail with an error saying: error: pods "assignment" not found.
+
+The Smart Shortcut Behind deploy/
+When you port-forward to a Deployment, Kubernetes does something incredibly convenient behind the scenes:
+
+It looks at the deployment named assignment.
+
+It checks which Pods are currently running under that deployment.
+
+It automatically selects one active, healthy Pod from that deployment and routes your temporary tunnel straight into it.
+
+If that specific Pod happens to crash or get deleted while you are testing, 
+kubectl is smart enough to automatically switch the tunnel over to a different, 
+healthy Pod belonging to that same deployment without breaking your port-forward connection!

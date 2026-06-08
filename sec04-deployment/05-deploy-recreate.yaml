@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service-deploy
+spec:
+  minReadySeconds: 10
+  strategy:
+    type: Recreate
+  selector:  
+    matchLabels:
+       app: order-service
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: order-service
+        team: team-A
+    spec:
+      containers:
+      - name: order-service
+        image: vinsdocker/k8s-app:v2 
+        env:
+        - name: DUMMY
+          value: "8"
+        ports:
+        - name: "app-port"
+          containerPort: 80       
