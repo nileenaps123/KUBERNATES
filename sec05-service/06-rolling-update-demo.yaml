@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service-deploy
+  namespace: dev
 spec:
   minReadySeconds: 5
   strategy:
@@ -20,7 +21,7 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: vinsdocker/k8s-app:v3
+        image: vinsdocker/k8s-app:v2
         env:
         - name: DUMMY
           value: "8"
