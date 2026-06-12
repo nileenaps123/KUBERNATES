@@ -1,0 +1,22 @@
+#In YAML, spaces are not just for visual neatness—spaces define ownership and hierarchy. 
+#There are no curly braces {} or parentheses () to group things, so YAML uses spaces to say "this child belongs to that parent."
+[
+  {
+    "name": "request.timeout",
+    "valueFrom": {
+      "configMapKeyRef": {
+        "name": "app-properties",
+        "key": "timeout"
+      }
+    }
+  },
+  {
+    "name": "application.url",
+    "valueFrom": {
+      "configMapKeyRef": {
+        "name": "app-properties",
+        "key": "appUrl"
+      }
+    }
+  }
+]
