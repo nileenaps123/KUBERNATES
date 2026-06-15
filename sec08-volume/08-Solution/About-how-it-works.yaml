@@ -1,0 +1,46 @@
+The reason your initialization data isn't showing up or executing again is due to how the MongoDB Docker image handles its initialization lifecycle, combined with how the StatefulSet's persistent storage works.
+
+Here is the exact breakdown of why this happens.
+
+1. Re-applying the Service changes absolutely nothing about your data
+First, let's look at what a Kubernetes Service does. As we discussed earlier, a Service is just a network traffic cop (a router/load balancer).
+
+Deleting and re-applying the Service simply deletes and recreates the internal network endpoint (mongo).
+
+The Service has zero connection to storage. It doesn't touch the Pod, it doesn't touch the containers, and it doesn't touch the disks.
+
+Because deleting the Service does not restart or wipe the MongoDB Pod, your database container keeps running smoothly without missing a beat.
+
+2. The Real Culprit: The /data/db Guard Lock 🔒
+Even if you delete the entire StatefulSet Pod and let Kubernetes recreate it, the script inside /docker-entrypoint-initdb.d still won't run a second time. Why?
+
+The official MongoDB Docker image is designed with a safety mechanism: It will only initialize a database ONCE.
+
+Here is the internal sequence of events that happened on your very first deployment:
+
+Kubernetes created the persistent disk for mongo-storage and mounted it to /data/db.
+
+The MongoDB container booted up and looked inside /data/db.
+
+It saw that /data/db was completely empty (a brand new disk).
+
+Because it was empty, MongoDB triggered its "First-Time Boot" routine:
+
+It looked inside /docker-entrypoint-initdb.d.
+
+It found your Javascript file from the ConfigMap (mongo-init-js) and executed it.
+
+It created the underlying, core database system files inside /data/db.
+
+What happens on the second deployment?
+When you delete and re-apply your configuration, the StatefulSet reconnects to that exact same mongo-storage persistent volume.
+
+The MongoDB container boots up again.
+
+It looks inside /data/db.
+
+It sees existing MongoDB system data files left over from the first boot.
+
+The container says: "Ah, this database has already been initialized before."
+
+It skips the /docker-entrypoint-initdb.d folder entirely to prevent accidentally overwriting or duplicating your existing data, and just boots up normally.

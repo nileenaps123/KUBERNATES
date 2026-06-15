@@ -1,7 +1,7 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: my-deploy
+  name: my-ss
 spec:
   selector:  
     matchLabels:
@@ -14,4 +14,4 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx         
+        image: nginx:1.15 # for demo        
